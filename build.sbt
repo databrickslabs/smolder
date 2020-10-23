@@ -21,7 +21,7 @@ def majorMinorVersion(version: String): String = {
 
 ThisBuild / scalaVersion := sys.env.getOrElse("SCALA_VERSION", scala212)
 ThisBuild / organization := "io.projectglow"
-ThisBuild / scalastyleConfig := baseDirectory.value / "scalastyle-config.xml"
+//ThisBuild / scalastyleConfig := baseDirectory.value / "scalastyle-config.xml"
 ThisBuild / publish / skip := true
 
 ThisBuild / organizationName := "The Glow Authors"
@@ -54,18 +54,18 @@ def groupByHash(tests: Seq[TestDefinition]): Seq[Tests.Group] = {
     .toSeq
 }
 
-lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
-lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+//lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
+//lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 // testGrouping cannot be set globally using the `Test /` syntax since it's not a pure value
 lazy val commonSettings = Seq(
-  mainScalastyle := scalastyle.in(Compile).toTask("").value,
-  testScalastyle := scalastyle.in(Test).toTask("").value,
+  //mainScalastyle := scalastyle.in(Compile).toTask("").value,
+  //testScalastyle := scalastyle.in(Test).toTask("").value,
   testGrouping in Test := groupByHash((definedTests in Test).value),
-  test in Test := ((test in Test) dependsOn mainScalastyle).value,
-  test in Test := ((test in Test) dependsOn testScalastyle).value,
-  test in Test := ((test in Test) dependsOn scalafmtCheckAll).value,
-  test in Test := ((test in Test) dependsOn (headerCheck in Compile)).value,
-  test in Test := ((test in Test) dependsOn (headerCheck in Test)).value,
+  //test in Test := ((test in Test) dependsOn mainScalastyle).value,
+  //test in Test := ((test in Test) dependsOn testScalastyle).value,
+  //test in Test := ((test in Test) dependsOn scalafmtCheckAll).value,
+  //test in Test := ((test in Test) dependsOn (headerCheck in Compile)).value,
+  //test in Test := ((test in Test) dependsOn (headerCheck in Test)).value,
   test in assembly := {},
   assemblyMergeStrategy in assembly := {
     // Assembly jar is not executable

@@ -150,7 +150,7 @@ case class Segment(id: UTF8String,
   def toInternalRow(requiredSchema: StructType): InternalRow = {
     val fieldNames = requiredSchema.fieldNames
     val segmentFields = (fieldNames.contains("id"), fieldNames.contains("fields"))
-    System.err.println("Have fields for segment " + segmentFields)
+
     segmentFields match {
       case (true, true) => InternalRow(id, ArrayData.toArrayData(fields.toArray))
       case (true, false) => InternalRow(id)
@@ -204,7 +204,7 @@ case class Message(message: UTF8String,
     }
     val fieldNames = requiredSchema.fieldNames
     val messageFields = (fieldNames.contains("message"), fieldNames.contains("segments"))
-    System.err.println("Have fields for message " + messageFields)
+
     messageFields match {
       case (true, true) => InternalRow(message, makeSegments)
       case (true, false) => InternalRow(message)
@@ -219,8 +219,6 @@ case class HL7Iterator(
   requiredSchema: StructType)
     extends Iterator[InternalRow] {
 
-  System.err.println("Creating HL7 iterator with schema: " + requiredSchema.mkString(", "))
-
   override def hasNext: Boolean = {
     lines.hasNext
   }
@@ -228,7 +226,7 @@ case class HL7Iterator(
   override def next(): InternalRow = {
     // parse the rows in this file entirely
     val ir = Message(lines).toInternalRow(requiredSchema)
-    System.err.println("Read message " + ir)
+
     ir
   }
 }
