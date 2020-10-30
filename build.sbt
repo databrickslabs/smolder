@@ -20,12 +20,12 @@ def majorMinorVersion(version: String): String = {
 }
 
 ThisBuild / scalaVersion := sys.env.getOrElse("SCALA_VERSION", scala212)
-ThisBuild / organization := "io.projectglow"
+ThisBuild / organization := "com.databricks.labs"
 //ThisBuild / scalastyleConfig := baseDirectory.value / "scalastyle-config.xml"
 ThisBuild / publish / skip := true
 
-ThisBuild / organizationName := "The Glow Authors"
-ThisBuild / startYear := Some(2019)
+ThisBuild / organizationName := "Databricks, Inc."
+ThisBuild / startYear := Some(2020)
 ThisBuild / licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 // Compile Java sources before Scala sources, so Scala code can depend on Java
@@ -114,8 +114,6 @@ lazy val coreDependencies = (providedSparkDependencies ++ testCoreDependencies +
   "org.yaml" % "snakeyaml" % "1.16"
 )).map(_.exclude("com.google.code.findbugs", "jsr305"))
 
-lazy val root = (project in file(".")).aggregate(core)
-
 lazy val scalaLoggingDependency = settingKey[ModuleID]("scalaLoggingDependency")
 ThisBuild / scalaLoggingDependency := {
   (ThisBuild / scalaVersion).value match {
@@ -127,7 +125,7 @@ ThisBuild / scalaLoggingDependency := {
   }
 }
 
-lazy val core = (project in file("core"))
+lazy val core = (project in file("."))
   .settings(
     commonSettings,
     name := "smolder",
@@ -161,31 +159,26 @@ lazy val sparkHome = taskKey[String]("sparkHome")
 
 // Publish to Bintray
 ThisBuild / description := "An open-source toolkit for large-scale genomic analysis"
-ThisBuild / homepage := Some(url("https://projectsmolder.io"))
+ThisBuild / homepage := Some(url("https://databricks.com/solutions/industries/healthcare"))
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/projectsmolder/smolder"),
-    "scm:git@github.com:projectsmolder/smolder.git"
+    url("https://github.com/databrickslabs/smolder"),
+    "scm:git@github.com:databrickslabs/smolder.git"
   )
 )
 ThisBuild / developers := List(
   Developer(
-    "henrydavidge",
-    "Henry Davidge",
-    "hhd@databricks.com",
-    url("https://github.com/henrydavidge")),
-  Developer(
-    "karenfeng",
-    "Karen Feng",
-    "karen.feng@databricks.com",
-    url("https://github.com/karenfeng"))
+    "ryandecosmo",
+    "Ryan DeCosmo",
+    "ryan.decosmo@databricks.com",
+    url("https://github.com/ryandecosmo"))
 )
 ThisBuild / pomIncludeRepository := { _ =>
   false
 }
 ThisBuild / publishMavenStyle := true
 
-ThisBuild / bintrayOrganization := Some("projectsmolder")
+ThisBuild / bintrayOrganization := Some("com.databricks.labs")
 ThisBuild / bintrayRepository := "smolder"
 
 lazy val stableVersion = settingKey[String]("Stable version")
@@ -193,7 +186,7 @@ ThisBuild / stableVersion := IO
   .read((ThisBuild / baseDirectory).value / "stable-version.txt")
   .trim()
 
-lazy val stagedRelease = (project in file("core/src/test"))
+lazy val stagedRelease = (project in file("src/test"))
   .settings(
     commonSettings,
     resourceDirectory in Test := baseDirectory.value / "resources",
@@ -201,8 +194,8 @@ lazy val stagedRelease = (project in file("core/src/test"))
     unmanagedSourceDirectories in Test += baseDirectory.value / "shim" / majorMinorVersion(
       sparkVersion),
     libraryDependencies ++= testSparkDependencies ++ testCoreDependencies :+
-    "io.projectsmolder" %% "smolder" % stableVersion.value % "test",
-    resolvers := Seq("bintray-staging" at "https://dl.bintray.com/projectsmolder/smolder"),
+    "com.databricks.labs" %% "smolder" % stableVersion.value % "test",
+    resolvers := Seq("bintray-staging" at "https://dl.bintray.com/com.databricks.labs/smolder"),
     org
       .jetbrains
       .sbt
