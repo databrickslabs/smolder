@@ -39,6 +39,25 @@ private[smolder] object Message {
             lines.toSeq
               .map(Segment(_)))
   }
+
+  /**
+    * Parses HL7 messages from a string.
+    *
+    * Returns a null if the input is null.
+    * 
+    * @param text A string to parse.
+    * @return Parses the message into a Message case class.
+    */
+  def apply(text: UTF8String): Message = {
+    if (text == null) {
+      null
+    } else {
+      val textString = text.toString
+      require(textString.nonEmpty, "Received empty string.")
+
+      Message(textString.split('\n').toIterator)
+    }
+  }
 }
 
 /**
@@ -51,8 +70,20 @@ private[smolder] case class Message(message: UTF8String,
   segments: Seq[Segment]) {
 
   /**
-    * @return Converts into a Spark SQL InternalRow.
-    */
+   * Returns a message as a row, with all possible fields included.
+   * 
+   * @return Converts into a Spark SQL InternalRow.
+   */
+  def toInternalRow(): InternalRow = {
+    toInternalRow(Message.schema)
+  }
+
+  /**
+   * Returns a message as a row, possibly with some fields projected away.
+   *  
+   * @param requiredSchema The schema to project.
+   * @return Converts into a Spark SQL InternalRow.
+   */
   def toInternalRow(requiredSchema: StructType): InternalRow = {
     def makeSegments: ArrayData = {
       ArrayData.toArrayData(segments.map(s => {

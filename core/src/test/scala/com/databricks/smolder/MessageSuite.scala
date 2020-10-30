@@ -1,6 +1,7 @@
 package com.databricks.smolder
 
 import org.apache.spark.sql.types._
+import org.apache.spark.unsafe.types.UTF8String
 import scala.io.Source
 
 class MessageSuite extends SmolderBaseTest {
@@ -28,13 +29,24 @@ class MessageSuite extends SmolderBaseTest {
     })
   }
 
-  test("cannot parse an empty message") {
+  test("cannot parse an empty iterator") {
     intercept[IllegalArgumentException] {
       Message(Iterator())
     }
   }
 
-  test("parse only a message header") {
+  test("cannot parse an empty string") {
+    intercept[IllegalArgumentException] {
+      Message(UTF8String.fromString(""))
+    }
+  }
+
+  test("passing a null string returns a null message") {
+    val nullMessage: UTF8String = null
+    assert(Message(nullMessage) === null)
+  }
+
+  test("parse only a message header, by iterator") {
 
     val message = Message(Iterator(msh))
 
@@ -42,12 +54,42 @@ class MessageSuite extends SmolderBaseTest {
     assert(message.segments.isEmpty)
   }
 
-  test("parse a full message") {
+  test("parse only a message header, by string") {
+
+    val message = Message(UTF8String.fromString(msh))
+
+    assert(message.message.toString === msh)
+    assert(message.segments.isEmpty)
+  }
+
+  test("parse a full message, by iterator") {
 
     val file = testFile("single_record.hl7")
     val lines = Source.fromFile(file).getLines()
 
     val message = Message(lines)
+
+    assert(message.message.toString === msh)
+
+    val segments = message.segments
+    assert(segments.size === 3)
+
+    def validateSegment(idx: Int, id: String, size: Int) {
+      assert(segments(idx).id.toString === id)
+      assert(segments(idx).fields.size === size)
+    }
+
+    validateSegment(0, "EVN", 2)
+    validateSegment(1, "PID", 11)
+    validateSegment(2, "PV1", 44)
+  }
+
+  test("parse a full message, by string") {
+
+    val file = testFile("single_record.hl7")
+    val lines = Source.fromFile(file).getLines().mkString("\n")
+
+    val message = Message(UTF8String.fromString(lines))
 
     assert(message.message.toString === msh)
 
