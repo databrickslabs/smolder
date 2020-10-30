@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.databricks.smolder
+package com.databricks.labs.smolder
 
-import com.databricks.smolder.sql._
+import com.databricks.labs.smolder.sql._
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions._
 

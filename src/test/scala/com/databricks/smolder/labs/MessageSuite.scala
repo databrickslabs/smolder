@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.databricks.smolder
+package com.databricks.labs.smolder
 
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String

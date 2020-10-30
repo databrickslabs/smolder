@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.databricks.smolder
+package com.databricks.labs.smolder
 
 class HL7FileFormatSuite extends SmolderBaseTest {
 
@@ -21,7 +21,7 @@ class HL7FileFormatSuite extends SmolderBaseTest {
 
     val file = testFile("single_record.hl7")
 
-    val df = spark.read.format("com.databricks.smolder.HL7FileFormat")
+    val df = spark.read.format("com.databricks.labs.smolder.HL7FileFormat")
       .load(file)
 
     assert(df.collect().size === 1)

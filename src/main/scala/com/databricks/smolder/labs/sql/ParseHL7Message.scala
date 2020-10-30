@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.databricks.smolder.sql
+package com.databricks.labs.smolder.sql
 
-import com.databricks.smolder.Message
+import com.databricks.labs.smolder.Message
 import org.apache.spark.sql.catalyst.expressions.codegen._
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnaryExpression}
 import org.apache.spark.sql.types._
@@ -34,7 +34,7 @@ private[smolder] case class ParseHL7Message(child: Expression)
       c => {
         s"""
          |${ev.value} =
-         |com.databricks.smolder.Message.apply($c).toInternalRow();
+         |com.databricks.labs.smolder.Message.apply($c).toInternalRow();
        """.stripMargin
       }
     )
