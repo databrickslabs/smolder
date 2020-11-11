@@ -1,0 +1,161 @@
+setup_base: &setup_base
+  working_directory: ~/smolder
+  docker:
+    - image: circleci/openjdk:8
+
+install_conda_deps: &install_conda_deps
+  run:
+    name: Install dependencies
+    command: |
+      export PATH=$HOME/conda/bin:$PATH
+      if [ ! -d "/home/circleci/conda" ]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-4.3.31-Linux-x86_64.sh
+        /bin/bash Miniconda3-4.3.31-Linux-x86_64.sh -b -p $HOME/conda
+        conda env create -f python/environment.yml
+      else
+        echo "Conda already installed"
+      fi
+
+
+check_clean_repo: &check_clean_repo
+  run:
+    name: Verify that repo is clean
+    environment:
+    command: |
+      if [[ -n $(git status --short) ]]; then
+        echo "Working directory was not clean!"
+        git status
+        false
+      else
+        true
+      fi
+
+
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.5
+jobs:
+
+  check-links:
+    <<: *setup_base
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - conda-deps-v1-{{ checksum "python/environment.yml" }}
+      - *install_conda_deps
+      - save_cache:
+          paths:
+            - /home/circleci/conda
+          key: conda-deps-v1-{{ checksum "python/environment.yml" }}
+      - run:
+          name: Check docs links
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            cd docs
+            make linkcheck
+
+
+  scala-2_12-tests:
+    <<: *setup_base
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - conda-deps-v1-{{ checksum "python/environment.yml" }}
+      - *install_conda_deps
+      - save_cache:
+          paths:
+            - /home/circleci/conda
+          key: conda-deps-v1-{{ checksum "python/environment.yml" }}
+      - *install_pyspark2
+      - run:
+          name: Run Scala tests
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            export SPARK_VERSION="2.4.5"
+            export SCALA_VERSION="2.12.8"
+            sbt core/test exit
+      - run:
+          name: Run Python tests
+          no_output_timeout: 30m
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            export SPARK_VERSION="2.4.5"
+            export SCALA_VERSION="2.12.8"
+            sbt python/test exit
+      - run:
+          name: Run docs tests
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            export SPARK_VERSION="2.4.5"
+            export SCALA_VERSION="2.12.8"
+            sbt docs/test exit
+
+
+  spark-3-tests:
+    <<: *setup_base
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - conda-deps-v1-{{ checksum "python/environment.yml" }}
+      - *install_conda_deps
+      - save_cache:
+          paths:
+            - /home/circleci/conda
+          key: conda-deps-v1-{{ checksum "python/environment.yml" }}
+      - run:
+          name: Run Scala tests
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            export SPARK_VERSION="3.0.0"
+            export SCALA_VERSION="2.12.8"
+            sbt core/test exit
+      - run:
+          name: Run Python tests
+          no_output_timeout: 30m
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            export SPARK_VERSION="3.0.0"
+            export SCALA_VERSION="2.12.8"
+            sbt python/test exit
+      - run:
+          name: Run docs tests
+          environment:
+          command: |
+            export PATH=$HOME/conda/envs/glow/bin:$PATH
+            export SPARK_VERSION="3.0.0"
+            export SCALA_VERSION="2.12.8"
+            sbt docs/test exit
+      - *check_clean_repo
+      - store_artifacts:
+          path: ~/glow/unit-tests.log
+          destination: unit-tests.log
+      - store_test_results:
+          path: ~/glow/core/target/scala-2.12/test-reports
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - check-links
+      - scala-2_12-tests
+      - spark-3-tests
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - check-links
+      - spark-3-tests
