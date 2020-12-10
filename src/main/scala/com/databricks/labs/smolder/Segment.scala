@@ -34,9 +34,10 @@ private[smolder] object Segment {
     require(segment.nonEmpty, "Received empty segment.")
 
     // assume pipe delimited
+    //@TODO: pull delimiter from MSH segment
     val fields = segment.split('|').map(UTF8String.fromString(_))
 
-    require(fields.size > 1,
+    require(fields.size >= 1,
       "Encountered message segment with insufficient fields: %s".format(segment))
 
     Segment(fields.head, fields.tail)
