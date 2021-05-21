@@ -101,8 +101,10 @@ class MessageSuite extends SmolderBaseTest {
 
   test("parse a full message, by string") {
 
+    val delim: Byte = 0x0d
+
     val file = testFile("single_record.hl7")
-    val lines = Source.fromFile(file).getLines().mkString("\n")
+    val lines = Source.fromFile(file).getLines().mkString(delim.toChar.toString)
 
     val message = Message(UTF8String.fromString(lines))
 

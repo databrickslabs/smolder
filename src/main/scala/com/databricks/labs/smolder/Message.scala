@@ -64,13 +64,16 @@ private[smolder] object Message {
     * @return Parses the message into a Message case class.
     */
   def apply(text: UTF8String): Message = {
+
+    val delim: Byte = 0x0d
+
     if (text == null) {
       null
     } else {
       val textString = text.toString
       require(textString.nonEmpty, "Received empty string.")
 
-      Message(textString.split('\n').toIterator)
+      Message(textString.split(delim.toChar).toIterator)
     }
   }
 }
