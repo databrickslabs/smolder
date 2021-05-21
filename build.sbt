@@ -10,7 +10,7 @@ import sbt.nio.Keys._
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 
-lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.0.0")
+lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.0.1")
 
 def majorMinorVersion(version: String): String = {
   StringUtils.ordinalIndexOf(version, ".", 2) match {
@@ -158,7 +158,7 @@ lazy val sparkClasspath = taskKey[String]("sparkClasspath")
 lazy val sparkHome = taskKey[String]("sparkHome")
 
 // Publish to Bintray
-ThisBuild / description := "An open-source toolkit for large-scale genomic analysis"
+ThisBuild / description := "An open-source toolkit for large-scale EHR processing"
 ThisBuild / homepage := Some(url("https://databricks.com/solutions/industries/healthcare"))
 ThisBuild / scmInfo := Some(
   ScmInfo(

@@ -30,7 +30,9 @@ class functionsSuite extends SmolderBaseTest {
       .wholeTextFiles(file)
       .map(p => TextFile(p._1, p._2)))
 
-    val hl7Df = df.select(parse_hl7_message(df("value")).alias("hl7"))
+    val cleanDF  = df.select(regexp_replace(df("value"), "\n", "\r").alias("clean"))
+
+    val hl7Df = cleanDF.select(parse_hl7_message(cleanDF("clean")).alias("hl7"))
 
     assert(hl7Df.count() === 1)
     assert(hl7Df.selectExpr("explode(hl7.segments)").count() === 3)
@@ -59,7 +61,8 @@ class functionsSuite extends SmolderBaseTest {
       .wholeTextFiles(file)
       .map(p => TextFile(p._1, p._2)))
 
-    val hl7Df = df.select(parse_hl7_message(df("value")).alias("hl7"))
+    val cleanDF  = df.select(regexp_replace(df("value"), "\n", "\r").alias("clean"))
+    val hl7Df = cleanDF.select(parse_hl7_message(cleanDF("clean")).alias("hl7"))
 
     val evnType = hl7Df.select(segment_field("EVN", 0, col("hl7.segments"))
       .alias("type"))
