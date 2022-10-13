@@ -100,6 +100,21 @@ parsedDf: org.apache.spark.sql.DataFrame = [message: struct<message: string, seg
 
 This yields the same schema as our `hl7` data source.
 
+## Integration with Pyspark
+In order run Scala code with pyspark we must compile the smolder jar and pass it to our cluster. From there, we can do the following:
+```
+# Python
+from pyspark.sql.column import Column
+df = <some pyspark dataframe>
+jvm = sc._jvm
+ssqlContext = sqlContext._ssql_ctx
+jdf = df._jdf
+
+# Access the functions class 
+f = jvm.com.databricks.labs.smolder.functions(ssqlContext, jdf)
+result = df.select(Column(f.parse_hl7_message(jdf.col("value"))).alias("message"))
+```
+
 ## Extracting fields from an HL7 message segment
 
 While Smolder provides an easy-to-use schema for HL7 messages, we also provide
