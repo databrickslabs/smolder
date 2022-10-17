@@ -10,7 +10,7 @@ import sbt.nio.Keys._
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 
-lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.0.1")
+lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.2.0")
 
 def majorMinorVersion(version: String): String = {
   StringUtils.ordinalIndexOf(version, ".", 2) match {

@@ -24,6 +24,8 @@ import org.apache.spark.unsafe.types.UTF8String
 private[smolder] case class ParseHL7Message(child: Expression)
     extends UnaryExpression {
 
+  override protected def withNewChildInternal(newChild: Expression): Expression = copy(child = newChild)
+
   override def dataType: DataType = Message.schema
   override def nullSafeEval(input: Any): Any = Message(input.asInstanceOf[UTF8String]).toInternalRow()
 
