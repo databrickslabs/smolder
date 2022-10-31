@@ -37,7 +37,7 @@ Compile / compileOrder := CompileOrder.JavaThenScala
 // Spark session used by many tasks cannot be used concurrently.
 val testConcurrency = 1
 Test / fork := true
-concurrentRestrictions in Global := Seq(
+Global / concurrentRestrictions := Seq(
   Tags.limit(Tags.ForkedTestGroup, testConcurrency)
 )
 
@@ -60,14 +60,14 @@ def groupByHash(tests: Seq[TestDefinition]): Seq[Tests.Group] = {
 lazy val commonSettings = Seq(
   //mainScalastyle := scalastyle.in(Compile).toTask("").value,
   //testScalastyle := scalastyle.in(Test).toTask("").value,
-  testGrouping in Test := groupByHash((definedTests in Test).value),
+  Test / testGrouping := groupByHash((Test / definedTests).value),
   //test in Test := ((test in Test) dependsOn mainScalastyle).value,
   //test in Test := ((test in Test) dependsOn testScalastyle).value,
   //test in Test := ((test in Test) dependsOn scalafmtCheckAll).value,
   //test in Test := ((test in Test) dependsOn (headerCheck in Compile)).value,
   //test in Test := ((test in Test) dependsOn (headerCheck in Test)).value,
-  test in assembly := {},
-  assemblyMergeStrategy in assembly := {
+  assembly / test := {},
+  assembly / assemblyMergeStrategy := {
     // Assembly jar is not executable
     case p if p.toLowerCase.contains("manifest.mf") =>
       MergeStrategy.discard
@@ -132,7 +132,7 @@ lazy val core = (project in file("."))
     publish / skip := false,
     // Adds the Git hash to the MANIFEST file. We set it here instead of relying on sbt-release to
     // do so.
-    packageOptions in (Compile, packageBin) +=
+    Compile / packageBin / packageOptions +=
     Package.ManifestAttributes("Git-Release-Hash" -> currentGitHash(baseDirectory.value)),
     bintrayRepository := "smolder",
     libraryDependencies ++= coreDependencies :+ scalaLoggingDependency.value,
@@ -189,10 +189,9 @@ ThisBuild / stableVersion := IO
 lazy val stagedRelease = (project in file("src/test"))
   .settings(
     commonSettings,
-    resourceDirectory in Test := baseDirectory.value / "resources",
-    scalaSource in Test := baseDirectory.value / "scala",
-    unmanagedSourceDirectories in Test += baseDirectory.value / "shim" / majorMinorVersion(
-      sparkVersion),
+    Test / resourceDirectory := baseDirectory.value / "resources",
+    Test / scalaSource := baseDirectory.value / "scala",
+    Test / unmanagedSourceDirectories += baseDirectory.value / "shim" / majorMinorVersion(sparkVersion),
     libraryDependencies ++= testSparkDependencies ++ testCoreDependencies :+
     "com.databricks.labs" %% "smolder" % stableVersion.value % "test",
     resolvers := Seq("bintray-staging" at "https://dl.bintray.com/com.databricks.labs/smolder"),
