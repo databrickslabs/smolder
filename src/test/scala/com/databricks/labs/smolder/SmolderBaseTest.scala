@@ -26,7 +26,8 @@ abstract class SmolderBaseTest
 
   protected implicit def spark: SparkSession = {
     val session = SparkSession.builder()
-      .master("local[2]")
+      .master("local[2]") 
+      .config("spark.driver.bindAddress","127.0.0.1") //Explicitly state this for Spark3.2.1
       .getOrCreate()
 
     SparkSession.setActiveSession(session)

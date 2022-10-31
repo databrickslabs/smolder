@@ -103,14 +103,14 @@ lazy val testCoreDependencies = Seq(
 )
 
 lazy val coreDependencies = (providedSparkDependencies ++ testCoreDependencies ++ Seq(
-  "log4j" % "log4j" % "1.2.17",
+//  "log4j" % "log4j" % "1.2.17",
   "org.slf4j" % "slf4j-api" % "1.7.25",
   "org.slf4j" % "slf4j-log4j12" % "1.7.25",
   "org.jdbi" % "jdbi" % "2.63.1",
   // Fix versions of libraries that are depended on multiple times
-  "org.apache.hadoop" % "hadoop-client" % "2.7.3",
-  "io.netty" % "netty" % "3.9.9.Final",
-  "io.netty" % "netty-all" % "4.1.17.Final",
+  "org.apache.hadoop" % "hadoop-client" % "3.3.1",
+//  "io.netty" % "netty" % "3.9.9.Final",
+//  "io.netty" % "netty-all" % "4.1.17.Final",
   "org.yaml" % "snakeyaml" % "1.16"
 )).map(_.exclude("com.google.code.findbugs", "jsr305"))
 
