@@ -10,7 +10,7 @@ import sbt.nio.Keys._
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 
-lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.0.1")
+lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.2.1")
 
 def majorMinorVersion(version: String): String = {
   StringUtils.ordinalIndexOf(version, ".", 2) match {
@@ -37,7 +37,7 @@ Compile / compileOrder := CompileOrder.JavaThenScala
 // Spark session used by many tasks cannot be used concurrently.
 val testConcurrency = 1
 Test / fork := true
-concurrentRestrictions in Global := Seq(
+Global / concurrentRestrictions := Seq(
   Tags.limit(Tags.ForkedTestGroup, testConcurrency)
 )
 
@@ -60,14 +60,14 @@ def groupByHash(tests: Seq[TestDefinition]): Seq[Tests.Group] = {
 lazy val commonSettings = Seq(
   //mainScalastyle := scalastyle.in(Compile).toTask("").value,
   //testScalastyle := scalastyle.in(Test).toTask("").value,
-  testGrouping in Test := groupByHash((definedTests in Test).value),
+  Test / testGrouping := groupByHash((Test / definedTests).value),
   //test in Test := ((test in Test) dependsOn mainScalastyle).value,
   //test in Test := ((test in Test) dependsOn testScalastyle).value,
   //test in Test := ((test in Test) dependsOn scalafmtCheckAll).value,
   //test in Test := ((test in Test) dependsOn (headerCheck in Compile)).value,
   //test in Test := ((test in Test) dependsOn (headerCheck in Test)).value,
-  test in assembly := {},
-  assemblyMergeStrategy in assembly := {
+  assembly / test := {},
+  assembly / assemblyMergeStrategy := {
     // Assembly jar is not executable
     case p if p.toLowerCase.contains("manifest.mf") =>
       MergeStrategy.discard
@@ -103,14 +103,14 @@ lazy val testCoreDependencies = Seq(
 )
 
 lazy val coreDependencies = (providedSparkDependencies ++ testCoreDependencies ++ Seq(
-  "log4j" % "log4j" % "1.2.17",
+//  "log4j" % "log4j" % "1.2.17",
   "org.slf4j" % "slf4j-api" % "1.7.25",
   "org.slf4j" % "slf4j-log4j12" % "1.7.25",
   "org.jdbi" % "jdbi" % "2.63.1",
   // Fix versions of libraries that are depended on multiple times
-  "org.apache.hadoop" % "hadoop-client" % "2.7.3",
-  "io.netty" % "netty" % "3.9.9.Final",
-  "io.netty" % "netty-all" % "4.1.17.Final",
+  "org.apache.hadoop" % "hadoop-client" % "3.3.1",
+//  "io.netty" % "netty" % "3.9.9.Final",
+//  "io.netty" % "netty-all" % "4.1.17.Final",
   "org.yaml" % "snakeyaml" % "1.16"
 )).map(_.exclude("com.google.code.findbugs", "jsr305"))
 
@@ -132,7 +132,7 @@ lazy val core = (project in file("."))
     publish / skip := false,
     // Adds the Git hash to the MANIFEST file. We set it here instead of relying on sbt-release to
     // do so.
-    packageOptions in (Compile, packageBin) +=
+    Compile / packageBin / packageOptions +=
     Package.ManifestAttributes("Git-Release-Hash" -> currentGitHash(baseDirectory.value)),
     bintrayRepository := "smolder",
     libraryDependencies ++= coreDependencies :+ scalaLoggingDependency.value,
@@ -189,10 +189,9 @@ ThisBuild / stableVersion := IO
 lazy val stagedRelease = (project in file("src/test"))
   .settings(
     commonSettings,
-    resourceDirectory in Test := baseDirectory.value / "resources",
-    scalaSource in Test := baseDirectory.value / "scala",
-    unmanagedSourceDirectories in Test += baseDirectory.value / "shim" / majorMinorVersion(
-      sparkVersion),
+    Test / resourceDirectory := baseDirectory.value / "resources",
+    Test / scalaSource := baseDirectory.value / "scala",
+    Test / unmanagedSourceDirectories += baseDirectory.value / "shim" / majorMinorVersion(sparkVersion),
     libraryDependencies ++= testSparkDependencies ++ testCoreDependencies :+
     "com.databricks.labs" %% "smolder" % stableVersion.value % "test",
     resolvers := Seq("bintray-staging" at "https://dl.bintray.com/com.databricks.labs/smolder"),

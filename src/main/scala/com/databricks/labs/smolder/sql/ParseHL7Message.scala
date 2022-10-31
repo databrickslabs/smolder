@@ -26,7 +26,7 @@ private[smolder] case class ParseHL7Message(child: Expression)
 
   override def dataType: DataType = Message.schema
   override def nullSafeEval(input: Any): Any = Message(input.asInstanceOf[UTF8String]).toInternalRow()
-
+  override protected def withNewChildInternal(newChild: Expression): Expression = copy(child = newChild)
   override def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
     nullSafeCodeGen(
       ctx,
