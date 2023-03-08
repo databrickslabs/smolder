@@ -75,7 +75,7 @@ class functionsSuite extends SmolderBaseTest {
     val spark2 = spark
     import spark2.implicits._
 
-    val df = Seq("MSH\rTST^1234567890^^^HOSPITALONE^MRN~4646464646^^^HOSPITALTWO^MRN~9431675613^^^HOSPITALTHRE^MRN").toDF("text")
+    val df = Seq("MSH\rTST|1234567890^^^HOSPITALONE^MRN~4646464646^^^HOSPITALTWO^MRN~9431675613^^^HOSPITALTHRE^MRN").toDF("text")
     val hl7Df = df.select(parse_hl7_message(df("text")).alias("hl7"))
     assert( hl7Df.select(segment_field("TST", 0, col("hl7.segments")).alias("TST_0")).select(repeating_field(col("TST_0"), 0, "~")).first().getString(0) === "1234567890^^^HOSPITALONE^MRN" )
     assert( hl7Df.select(segment_field("TST", 0, col("hl7.segments")).alias("TST_0")).select(repeating_field(col("TST_0"), 1, "~")).first().getString(0) === "4646464646^^^HOSPITALTWO^MRN" )
