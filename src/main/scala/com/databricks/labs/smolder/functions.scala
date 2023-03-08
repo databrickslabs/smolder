@@ -22,6 +22,17 @@ import org.apache.spark.sql.functions._
 object functions {
 
   /**
+   * Extracts the value at a specific index in a repeating field
+   * 
+   * @param col A column containing the repeated field from a message segment
+   * @param repIndex The index of repeated field value that must be extracted
+   * @return Yields a new column containing the field of a message segment.
+   */
+  def repeating_field(col: Column, repIndex: Int, delim: String="~"): Column = {
+    split(col, delim).getItem(repIndex)
+  }
+
+  /**
     * Parses a textual, pipe-delimited HL7v2 message.
     * 
     * @param message Column containing HL7v2 message text to parse.
