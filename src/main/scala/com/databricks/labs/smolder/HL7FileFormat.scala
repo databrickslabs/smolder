@@ -73,7 +73,7 @@ class HL7FileFormat extends FileFormat with DataSourceRegister {
     val serializableConf = new SerializableConfiguration(hadoopConf)
     
     partitionedFile => {
-      val path = new Path(partitionedFile.filePath)
+      val path = new Path(partitionedFile.filePath.toUri)
       val hadoopFs = path.getFileSystem(serializableConf.value)
 
       // open file, read fully, and close

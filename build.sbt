@@ -10,7 +10,7 @@ import sbt.nio.Keys._
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 
-lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.2.1")
+lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.4.1")
 
 def majorMinorVersion(version: String): String = {
   StringUtils.ordinalIndexOf(version, ".", 2) match {
@@ -79,9 +79,6 @@ lazy val commonSettings = Seq(
   resolvers += "Apache Snapshots" at "https://repository.apache.org/snapshots/"
 )
 
-lazy val functionsYml = settingKey[File]("functionsYml")
-ThisBuild / functionsYml := (ThisBuild / baseDirectory).value / "functions.yml"
-
 lazy val sparkDependencies = Seq(
   "org.apache.spark" %% "spark-catalyst" % sparkVersion,
   "org.apache.spark" %% "spark-core" % sparkVersion,
@@ -134,7 +131,6 @@ lazy val core = (project in file("."))
     // do so.
     Compile / packageBin / packageOptions +=
     Package.ManifestAttributes("Git-Release-Hash" -> currentGitHash(baseDirectory.value)),
-    bintrayRepository := "smolder",
     libraryDependencies ++= coreDependencies :+ scalaLoggingDependency.value,
     Compile / unmanagedSourceDirectories +=
     baseDirectory.value / "src" / "main" / "shim" / majorMinorVersion(sparkVersion),
@@ -179,29 +175,6 @@ ThisBuild / pomIncludeRepository := { _ =>
 ThisBuild / publishMavenStyle := true
 
 ThisBuild / bintrayOrganization := Some("com.databricks.labs")
-ThisBuild / bintrayRepository := "smolder"
-
-lazy val stableVersion = settingKey[String]("Stable version")
-ThisBuild / stableVersion := IO
-  .read((ThisBuild / baseDirectory).value / "stable-version.txt")
-  .trim()
-
-lazy val stagedRelease = (project in file("src/test"))
-  .settings(
-    commonSettings,
-    Test / resourceDirectory := baseDirectory.value / "resources",
-    Test / scalaSource := baseDirectory.value / "scala",
-    Test / unmanagedSourceDirectories += baseDirectory.value / "shim" / majorMinorVersion(sparkVersion),
-    libraryDependencies ++= testSparkDependencies ++ testCoreDependencies :+
-    "com.databricks.labs" %% "smolder" % stableVersion.value % "test",
-    resolvers := Seq("bintray-staging" at "https://dl.bintray.com/com.databricks.labs/smolder"),
-    org
-      .jetbrains
-      .sbt
-      .extractors
-      .SettingKeys
-      .sbtIdeaIgnoreModule := true // Do not import this SBT project into IDEA
-  )
 
 import ReleaseTransformations._
 
@@ -231,7 +204,6 @@ releaseProcess := Seq[ReleaseStep](
     tagRelease
   ) ++
   crossReleaseStep(publishArtifacts) ++
-  crossReleaseStep(releaseStepCommandAndRemaining("stagedRelease/test")) ++
   Seq(
     setNextVersion,
     commitNextVersion

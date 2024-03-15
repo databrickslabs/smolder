@@ -35,13 +35,6 @@ object StableVersionPlugin extends AutoPlugin {
 
   import autoImport._
 
-  override def projectSettings: Seq[Setting[_]] = {
-    Seq(
-      stableVersionFile := baseDirectory.value / "stable-version.txt",
-      stableCommitMessage := s"Setting stable version to ${runtimeVersion.value}"
-    )
-  }
-
   private def updateStableVersionStep(
       selectVersion: Versions => String,
       fileSettingKey: SettingKey[File]): ReleaseStep = { st: State =>
